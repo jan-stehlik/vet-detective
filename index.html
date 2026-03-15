@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔍 Symptom Sleuth: Vet Detective</title>
+<style>
+/* --- COLOR THEME & BASE --- */
+:root {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-card: #0f3460;
+  --bg-clue: #fdf6e3;
+  --accent: #e94560;
+  --accent-glow: #ff6b81;
+  --gold: #f5c842;
+  --green: #2ecc71;
+  --text-light: #eee;
+  --text-dark: #2c3e50;
+  --manila: #f5e6c8;
+  --manila-dark: #d4c5a0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: var(--bg-primary);
+  color: var(--text-light);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* --- TITLE SCREEN --- */
+#title-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  animation: fadeIn 1s ease;
+  padding: 2rem;
+}
+
+#title-screen h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--gold), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+}
+
+#title-screen .subtitle {
+  font-size: 1.3rem;
+  color: #aaa;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+#title-screen .magnifying-glass {
+  font-size: 6rem;
+  animation: float 3s ease-in-out infinite;
+  margin-bottom: 1rem;
+}
+
+.start-btn {
+  background: linear-gradient(135deg, var(--accent), #c0392b);
+  color: white;
+  border: none;
+  padding: 1rem 3rem;
+  font-size: 1.3rem;
+  font-family: inherit;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+  margin-top: 1rem;
+}
+
+.start-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 25px rgba(233, 69, 96, 0.6);
+}
+
+/* --- GAME HEADER --- */
+#game-screen { display: none; animation: fadeIn 0.5s ease; }
+
+.game-header {
+  background: var(--bg-secondary);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--accent);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.game-header .rank {
+  font-size: 1.1rem;
+  color: var(--gold);
+}
+
+.game-header .stats {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.stat-item { display: flex; align-items: center; gap: 0.4rem; }
+.stat-item .stat-icon { font-size: 1.2rem; }
+.stat-value { color: var(--gold); font-weight: bold; }
+
+/* --- MAIN LAYOUT --- */
+.game-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr 300px;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 60px);
+}
+
+@media (max-width: 1100px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+    max-width: 700px;
+  }
+}
+
+/* --- CASE FILE (LEFT PANEL) --- */
+.case-file {
+  background: var(--manila);
+  color: var(--text-dark);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 3px 3px 15px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.case-file::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--accent);
+}
+
+.case-file h2 {
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.patient-card {
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--manila-dark);
+}
+
+.patient-emoji {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 0.5rem;
+  animation: sickPulse 2s ease-in-out infinite;
+}
+
+.patient-name { font-size: 1.2rem; font-weight: bold; color: var(--text-dark); }
+.patient-species { font-size: 0.9rem; color: #777; margin-top: 0.2rem; }
+
+.owner-info {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--manila-dark);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.owner-info .label { font-weight: bold; color: var(--accent); }
+
+.case-difficulty {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.difficulty-star { color: var(--gold); }
+.difficulty-star.empty { color: #ccc; }
+
+/* --- INVESTIGATION AREA (CENTER) --- */
+.investigation-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.investigation-tools {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.investigation-tools h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.8rem;
+}
+
+.tool-btn {
+  background: var(--bg-secondary);
+  border: 2px solid #334;
+  color: var(--text-light);
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+}
+
+.tool-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: #1a2a4e;
+  transform: translateY(-1px);
+}
+
+.tool-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tool-btn .tool-icon { font-size: 1.4rem; }
+.tool-btn .tool-cost {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.tool-btn.used {
+  border-color: var(--green);
+  background: rgba(46, 204, 113, 0.1);
+}
+
+.tool-btn.used::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  color: var(--green);
+  font-size: 0.8rem;
+}
+
+/* --- CLUE REVEAL AREA --- */
+.clue-reveal {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  min-height: 150px;
+  flex: 1;
+}
+
+.clue-reveal h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clue-content {
+  background: var(--bg-clue);
+  color: var(--text-dark);
+  border-radius: 8px;
+  padding: 1.2rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  animation: revealClue 0.5s ease;
+  border-left: 4px solid var(--accent);
+}
+
+.clue-content.empty {
+  background: transparent;
+  color: #666;
+  border-left: none;
+  text-align: center;
+  font-style: italic;
+}
+
+/* --- EVIDENCE BOARD (RIGHT PANEL) --- */
+.evidence-board {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.evidence-board h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.evidence-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 300px;
+}
+
+.evidence-item {
+  background: var(--bg-clue);
+  color: var(--text-dark);
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  animation: slideIn 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.evidence-item .evidence-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+.diagnosis-section { margin-top: auto; }
+
+.diagnosis-section h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+  color: var(--accent);
+}
+
+.diagnosis-btn {
+  display: block;
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 2px solid #334;
+  color: var(--text-light);
+  padding: 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s;
+  text-align: left;
+}
+
+.diagnosis-btn:hover {
+  border-color: var(--gold);
+  background: #1a2a4e;
+}
+
+.diagnosis-btn.correct {
+  border-color: var(--green);
+  background: rgba(46, 204, 113, 0.2);
+  animation: correctPulse 0.5s ease;
+}
+
+.diagnosis-btn.wrong {
+  border-color: var(--accent);
+  background: rgba(233, 69, 96, 0.2);
+  animation: shake 0.5s ease;
+}
+
+/* --- RESULT OVERLAY --- */
+.result-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.result-overlay.show { display: flex; }
+
+.result-card {
+  background: var(--manila);
+  color: var(--text-dark);
+  border-radius: 12px;
+  padding: 2.5rem;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  animation: popIn 0.4s ease;
+  position: relative;
+}
+
+.result-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  border-radius: 12px 12px 0 0;
+}
+
+.result-emoji { font-size: 4rem; margin-bottom: 1rem; }
+
+.result-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+}
+
+.result-card .diagnosis-reveal {
+  font-size: 1.1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--manila-dark);
+}
+
+.result-card .explanation {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #555;
+  margin: 1rem 0;
+  text-align: left;
+  padding: 1rem;
+  background: #fff9ee;
+  border-radius: 8px;
+  border-left: 3px solid var(--gold);
+}
+
+.stars-display {
+  font-size: 2rem;
+  margin: 1rem 0;
+  letter-spacing: 0.3rem;
+}
+
+.result-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.result-stat-item { text-align: center; }
+.result-stat-value { font-size: 1.5rem; font-weight: bold; color: var(--accent); display: block; }
+
+.next-btn {
+  background: linear-gradient(135deg, var(--green), #27ae60);
+  color: white;
+  border: none;
+  padding: 0.9rem 2.5rem;
+  font-size: 1.1rem;
+  font-family: inherit;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 1rem;
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(46, 204, 113, 0.5);
+}
+
+/* --- CASE COMPLETE / GAME SUMMARY --- */
+.summary-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.5s ease;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+.summary-overlay.show { display: flex; }
+
+.summary-card {
+  background: var(--bg-secondary);
+  color: var(--text-light);
+  border-radius: 12px;
+  padding: 2.5rem;
+  max-width: 600px;
+  width: 90%;
+  text-align: center;
+  animation: popIn 0.5s ease;
+}
+
+.summary-card h2 {
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, var(--gold), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.final-rank {
+  font-size: 1.3rem;
+  color: var(--gold);
+  margin: 1rem 0;
+}
+
+.case-recap {
+  text-align: left;
+  margin: 1.5rem 0;
+}
+
+.case-recap-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  background: var(--bg-card);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.case-recap-item .recap-stars { color: var(--gold); }
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+@keyframes sickPulse {
+  0%, 100% { transform: scale(1); filter: hue-rotate(0deg); }
+  50% { transform: scale(1.05); filter: hue-rotate(20deg) saturate(0.7); }
+}
+@keyframes revealClue {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+@keyframes healedBounce {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.2); }
+  50% { transform: scale(0.95); }
+  70% { transform: scale(1.1); }
+}
+
+/* --- SCROLLBAR STYLING --- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+/* --- VET NOTEBOOK (solved cases log) --- */
+.notebook-btn {
+  background: transparent;
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+}
+
+.notebook-btn:hover {
+  background: rgba(245, 200, 66, 0.1);
+}
+
+/* --- HINT SYSTEM --- */
+.hint-btn {
+  background: transparent;
+  border: 1px dashed #666;
+  color: #888;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.hint-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+.hint-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.hint-text {
+  background: rgba(245, 200, 66, 0.1);
+  border: 1px solid rgba(245, 200, 66, 0.3);
+  color: var(--gold);
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  animation: revealClue 0.3s ease;
+  font-style: italic;
+}
+
+/* --- TIMER BAR --- */
+.timer-bar-container {
+  height: 4px;
+  background: var(--bg-secondary);
+  width: 100%;
+}
+
+.timer-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--gold), var(--accent));
+  transition: width 1s linear;
+  width: 100%;
+}
+
+/* --- THINKING DOTS --- */
+.thinking-dots::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== TITLE SCREEN ========== -->
+<div id="title-screen">
+  <div class="magnifying-glass">🔍</div>
+  <h1>Symptom Sleuth</h1>
+  <div class="subtitle">Vet Detective Agency</div>
+  <p style="max-width: 500px; color: #888; line-height: 1.6; margin-bottom: 1rem;">
+    Animals are counting on you! Investigate symptoms, gather clues, run tests,
+    and diagnose mysterious illnesses. Can you crack every case?
+  </p>
+  <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.5rem;">
+    <div style="background: var(--bg-card); padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 0.9rem;">
+      🩺 <span style="color: var(--gold);">Examine</span> patients
+    </div>
+    <div style="background: var(--bg-card); padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 0.9rem;">
+      🔬 <span style="color: var(--gold);">Run tests</span> for clues
+    </div>
+    <div style="background: var(--bg-card); padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 0.9rem;">
+      🧩 <span style="color: var(--gold);">Solve</span> the mystery
+    </div>
+  </div>
+  <button class="start-btn" onclick="startGame()">Begin Investigation 🔎</button>
+</div>
+
+<!-- ========== GAME SCREEN ========== -->
+<div id="game-screen">
+  <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+
+  <div class="game-header">
+    <div>
+      <div class="rank" id="rank-display">🔰 Vet Student</div>
+    </div>
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-icon">📋</span>
+        <span>Case <span class="stat-value" id="case-num">1</span>/<span id="total-cases">8</span></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon">⭐</span>
+        <span>Score: <span class="stat-value" id="score-display">0</span></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon">🏅</span>
+        <span>Streak: <span class="stat-value" id="streak-display">0</span></span>
+      </div>
+      <button class="notebook-btn" onclick="showNotebook()">📓 Casebook</button>
+    </div>
+  </div>
+
+  <div class="game-layout">
+    <!-- LEFT: Case File -->
+    <div class="case-file">
+      <h2>📁 Case File</h2>
+      <div class="patient-card">
+        <span class="patient-emoji" id="patient-emoji">🐕</span>
+        <div class="patient-name" id="patient-name">Buddy</div>
+        <div class="patient-species" id="patient-species">Golden Retriever, 5 years old</div>
+        <div class="case-difficulty" id="case-difficulty"></div>
+      </div>
+      <div class="owner-info" id="owner-info">
+        <div><span class="label">Owner:</span> <span id="owner-name">Sarah M.</span></div>
+        <div style="margin-top: 0.5rem;"><span class="label">Chief Complaint:</span></div>
+        <div id="chief-complaint" style="margin-top: 0.3rem; font-style: italic;"></div>
+      </div>
+      <div id="vital-signs" style="display: none;">
+        <div style="font-weight: bold; color: var(--accent); margin-bottom: 0.3rem; font-size: 0.9rem;">Vital Signs:</div>
+        <div id="vitals-content" style="font-size: 0.85rem; line-height: 1.8; background: white; padding: 0.8rem; border-radius: 6px;"></div>
+      </div>
+    </div>
+
+    <!-- CENTER: Investigation -->
+    <div class="investigation-area">
+      <div class="investigation-tools">
+        <h2>🧰 Investigation Tools</h2>
+        <div class="tools-grid" id="tools-grid"></div>
+      </div>
+
+      <div class="clue-reveal">
+        <h2>📝 Investigation Results</h2>
+        <div id="clue-content" class="clue-content empty">
+          Select an investigation tool to begin gathering clues...
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Evidence Board & Diagnosis -->
+    <div class="evidence-board">
+      <h2>📌 Evidence Board</h2>
+      <div class="evidence-list" id="evidence-list">
+        <div style="color: #666; font-style: italic; font-size: 0.85rem; text-align: center; padding: 1rem;">
+          Clues you discover will appear here
+        </div>
+      </div>
+
+      <div class="diagnosis-section">
+        <h3>🩺 Submit Diagnosis</h3>
+        <div id="diagnosis-options"></div>
+        <button class="hint-btn" id="hint-btn" onclick="showHint()">💡 Need a hint?</button>
+        <div id="hint-area"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== RESULT OVERLAY ========== -->
+<div class="result-overlay" id="result-overlay">
+  <div class="result-card">
+    <div class="result-emoji" id="result-emoji">🎉</div>
+    <h2 id="result-title">Case Solved!</h2>
+    <div class="diagnosis-reveal" id="diagnosis-reveal"></div>
+    <div class="explanation" id="result-explanation"></div>
+    <div class="stars-display" id="result-stars"></div>
+    <div class="result-stats">
+      <div class="result-stat-item">
+        <span class="result-stat-value" id="result-tests-used">3</span>
+        Tests Used
+      </div>
+      <div class="result-stat-item">
+        <span class="result-stat-value" id="result-points">+50</span>
+        Points
+      </div>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="nextCase()">Next Case →</button>
+  </div>
+</div>
+
+<!-- ========== SUMMARY OVERLAY ========== -->
+<div class="summary-overlay" id="summary-overlay">
+  <div class="summary-card">
+    <div style="font-size: 4rem; margin-bottom: 0.5rem;">🏆</div>
+    <h2>Investigation Complete!</h2>
+    <div class="final-rank" id="final-rank"></div>
+    <div class="result-stats" style="margin: 1.5rem 0;">
+      <div class="result-stat-item">
+        <span class="result-stat-value" id="final-score">0</span>
+        Total Score
+      </div>
+      <div class="result-stat-item">
+        <span class="result-stat-value" id="final-solved">0</span>
+        Cases Solved
+      </div>
+      <div class="result-stat-item">
+        <span class="result-stat-value" id="final-stars">0</span>
+        Total Stars
+      </div>
+    </div>
+    <div class="case-recap" id="case-recap"></div>
+    <button class="start-btn" onclick="restartGame()" style="margin-top: 1rem;">Play Again 🔄</button>
+  </div>
+</div>
+
+<script>
+// ============================================
+// SECTION 1: GAME DATA — Cases, tools, ranks
+// ============================================
+
+const investigationTools = [
+  { id: "talk-owner",    name: "Talk to Owner",    icon: "💬", cost: 1, description: "Ask the owner more questions" },
+  { id: "physical-exam", name: "Physical Exam",    icon: "🩺", cost: 1, description: "Examine the animal physically" },
+  { id: "temperature",   name: "Check Temperature",icon: "🌡️", cost: 1, description: "Take the animal's temperature" },
+  { id: "blood-test",    name: "Blood Test",       icon: "🔬", cost: 2, description: "Run a blood panel" },
+  { id: "xray",          name: "X-Ray",            icon: "☢️", cost: 2, description: "Take an X-ray image" },
+  { id: "urine-test",    name: "Urine Test",       icon: "🧪", cost: 2, description: "Analyze a urine sample" },
+  { id: "skin-scrape",   name: "Skin Scrape",      icon: "🔎", cost: 2, description: "Examine skin cells under microscope" },
+  { id: "ultrasound",    name: "Ultrasound",       icon: "📡", cost: 2, description: "Perform an ultrasound scan" },
+];
+
+const ranks = [
+  { title: "🔰 Vet Student",         minScore: 0 },
+  { title: "🩺 Junior Vet",           minScore: 80 },
+  { title: "⭐ Vet Resident",         minScore: 200 },
+  { title: "🏅 Senior Veterinarian",  minScore: 400 },
+  { title: "👑 Chief Vet Detective",  minScore: 600 },
+  { title: "🌟 Legendary Vet Sleuth", minScore: 850 },
+];
+
+const cases = [
+  // ---- CASE 1: Easy ----
+  {
+    animal: { name: "Buddy", emoji: "🐕", species: "Golden Retriever, 5 years old" },
+    owner: { name: "Sarah M.", complaint: "He's been really tired lately and won't eat his food. He usually gobbles everything up!" },
+    difficulty: 1,
+    investigations: {
+      "talk-owner":    { clue: "Owner says Buddy got into the trash two days ago and ate some chicken bones. He's been drinking more water than usual.", icon: "💬" },
+      "physical-exam": { clue: "Buddy's abdomen feels tense and he whimpers when you gently press on his belly. His gums are a bit pale.", icon: "🩺" },
+      "temperature":   { clue: "Temperature: 39.8°C (normal for dogs: 38.0-39.2°C). Slightly elevated — mild fever.", icon: "🌡️" },
+      "blood-test":    { clue: "White blood cell count is elevated, indicating the body is fighting an infection or inflammation. Liver values are normal.", icon: "🔬" },
+      "xray":          { clue: "X-ray shows a small bone fragment lodged in the upper intestine. No perforation visible, but there is some surrounding inflammation.", icon: "☢️" },
+      "urine-test":    { clue: "Urine appears normal. No signs of kidney issues or diabetes.", icon: "🧪" },
+      "skin-scrape":   { clue: "Skin and coat appear healthy. No parasites or abnormalities found.", icon: "🔎" },
+      "ultrasound":    { clue: "Ultrasound confirms a foreign body in the intestinal tract. The surrounding tissue shows mild inflammation but no blockage yet.", icon: "📡" },
+    },
+    diagnoses: [
+      "Food poisoning",
+      "Intestinal foreign body",
+      "Kidney disease",
+      "Parvovirus infection",
+    ],
+    correct: "Intestinal foreign body",
+    explanation: "Buddy swallowed chicken bone fragments that got stuck in his intestine. This is called an intestinal foreign body — it's one of the most common emergencies vets see in dogs! The bone caused inflammation and a mild fever. Luckily it hasn't caused a full blockage yet. Treatment involves careful monitoring and possibly surgery to remove the fragment. Fun fact: cooked chicken bones are especially dangerous because they can splinter into sharp pieces!",
+    hint: "Think about what the owner said Buddy got into recently... and what the X-ray showed.",
+    vitals: "Heart Rate: 110 bpm (normal) • Breathing: slightly fast • Weight: 30 kg • Hydration: adequate",
+  },
+
+  // ---- CASE 2: Easy ----
+  {
+    animal: { name: "Luna", emoji: "🐈", species: "Siamese Cat, 3 years old" },
+    owner: { name: "Marcus T.", complaint: "Luna keeps scratching her ears and shaking her head. I noticed some dark gunk in her ears." },
+    difficulty: 1,
+    investigations: {
+      "talk-owner":    { clue: "Marcus says Luna is an indoor/outdoor cat. The scratching started about a week ago and has been getting worse. She's also been more irritable.", icon: "💬" },
+      "physical-exam": { clue: "Dark brown, crumbly discharge in both ears. The ear canals look red and inflamed. Luna hisses when you touch her ears.", icon: "🩺" },
+      "temperature":   { clue: "Temperature: 38.6°C — completely normal for a cat (38.0-39.0°C).", icon: "🌡️" },
+      "blood-test":    { clue: "Blood values are all within normal range. No signs of systemic infection.", icon: "🔬" },
+      "xray":          { clue: "Skull X-ray shows no abnormalities in the ear structures. Bones and inner ear look healthy.", icon: "☢️" },
+      "urine-test":    { clue: "Urine is normal. No relevant findings.", icon: "🧪" },
+      "skin-scrape":   { clue: "Examining the ear discharge under the microscope reveals tiny, moving mites! They look like small white dots with legs. This is Otodectes cynotis — the common ear mite.", icon: "🔎" },
+      "ultrasound":    { clue: "Not particularly useful for ear issues. No abdominal abnormalities detected.", icon: "📡" },
+    },
+    diagnoses: [
+      "Ear mites",
+      "Bacterial ear infection",
+      "Allergic dermatitis",
+      "Ear polyp",
+    ],
+    correct: "Ear mites",
+    explanation: "Luna has ear mites (Otodectes cynotis) — tiny parasites that live in the ear canal and feed on skin oils and ear wax. The dark crumbly discharge is actually a mix of dried blood, ear wax, and mite waste — yuck! Ear mites are super common in outdoor cats and are very contagious between animals (but not to humans). Treatment is straightforward: special ear drops that kill the mites, plus cleaning the ears. Most cats feel better within a week! Fun fact: ear mites are so tiny you need a microscope to see them, but they cause BIG itchiness.",
+    hint: "The dark crumbly discharge is a classic clue... What could you look at under a microscope?",
+    vitals: "Heart Rate: 160 bpm (normal) • Breathing: normal • Weight: 4.2 kg • Hydration: good",
+  },
+
+  // ---- CASE 3: Medium ----
+  {
+    animal: { name: "Pepper", emoji: "🐇", species: "Holland Lop Rabbit, 2 years old" },
+    owner: { name: "Aisha K.", complaint: "Pepper hasn't pooped in almost two days and she's sitting hunched up in the corner. She normally runs around a lot." },
+    difficulty: 2,
+    investigations: {
+      "talk-owner":    { clue: "Aisha recently switched Pepper's food from hay-based pellets to a new brand that has more grains and seeds. Pepper loved the taste but has been eating less hay.", icon: "💬" },
+      "physical-exam": { clue: "Pepper's abdomen feels bloated and firm, like a small balloon. She grinds her teeth when you palpate it — this is a sign of pain in rabbits. Her gut sounds are very quiet.", icon: "🩺" },
+      "temperature":   { clue: "Temperature: 37.8°C (normal for rabbits: 38.0-40.0°C). Slightly below normal — this can indicate a rabbit in distress.", icon: "🌡️" },
+      "blood-test":    { clue: "Glucose levels are slightly elevated (stress response). Other values are normal. No signs of liver or kidney disease.", icon: "🔬" },
+      "xray":          { clue: "X-ray shows a very distended stomach full of gas. The intestines also show gas buildup. No blockage from a foreign object is visible, but gut motility appears to have slowed significantly.", icon: "☢️" },
+      "urine-test":    { clue: "Urine is slightly more concentrated than normal, suggesting mild dehydration.", icon: "🧪" },
+      "skin-scrape":   { clue: "Skin and fur look healthy. No parasites or skin issues.", icon: "🔎" },
+      "ultrasound":    { clue: "Ultrasound confirms gas-filled stomach and intestines. Gut motility is severely reduced — the intestines are barely moving. No masses or foreign bodies.", icon: "📡" },
+    },
+    diagnoses: [
+      "GI stasis (gut slowdown)",
+      "Intestinal blockage",
+      "Bloat from overeating",
+      "Bacterial infection",
+    ],
+    correct: "GI stasis (gut slowdown)",
+    explanation: "Pepper has gastrointestinal (GI) stasis — the most common and dangerous condition in pet rabbits! A rabbit's gut needs to keep moving constantly. When Pepper's diet changed from high-fiber hay to low-fiber grains, her gut slowed down and eventually nearly stopped. The gas built up because bacteria in the gut kept producing it, but it wasn't moving through. Treatment involves gut motility drugs, pain medication, fluids for hydration, and — most importantly — getting Pepper back on a high-hay diet. Fun fact: rabbits should eat a body-sized pile of hay EVERY DAY. Hay is the engine that keeps their gut moving!",
+    hint: "What changed in Pepper's diet recently? Rabbits need a very specific type of food to keep their gut working...",
+    vitals: "Heart Rate: 250 bpm (elevated/stressed) • Breathing: slightly fast • Weight: 1.8 kg • Hydration: mildly dehydrated",
+  },
+
+  // ---- CASE 4: Medium ----
+  {
+    animal: { name: "Captain", emoji: "🦜", species: "African Grey Parrot, 12 years old" },
+    owner: { name: "David L.", complaint: "Captain has been sneezing a lot and there's discharge from his nostrils. He's also fluffed up and less talkative than usual." },
+    difficulty: 2,
+    investigations: {
+      "talk-owner":    { clue: "David recently moved Captain's cage near the kitchen. He cooks with non-stick pans daily. Captain's diet is mainly sunflower seeds with some fruit.", icon: "💬" },
+      "physical-exam": { clue: "Captain's feathers are fluffed up (sign of feeling cold/sick). There's clear nasal discharge and you can hear a slight whistling when he breathes. His keel bone (chest) feels prominent — he may have lost weight.", icon: "🩺" },
+      "temperature":   { clue: "Bird body temperature is difficult to measure accurately, but Captain feels slightly cool to the touch compared to a healthy parrot.", icon: "🌡️" },
+      "blood-test":    { clue: "White blood cells are moderately elevated. The blood shows signs of a vitamin A deficiency — common in seed-only diets. Liver values are slightly off.", icon: "🔬" },
+      "xray":          { clue: "X-ray shows mild haziness in the air sacs (birds have air sacs instead of a diaphragm). This suggests a respiratory infection. No obvious masses.", icon: "☢️" },
+      "urine-test":    { clue: "Bird droppings analysis shows slightly green-colored urates, which can indicate liver stress.", icon: "🧪" },
+      "skin-scrape":   { clue: "Feather condition is poor with some stress bars visible. No external parasites.", icon: "🔎" },
+      "ultrasound":    { clue: "Limited usefulness in birds due to air sacs. No obvious masses in the abdomen.", icon: "📡" },
+    },
+    diagnoses: [
+      "Aspergillosis (fungal respiratory infection)",
+      "Common cold",
+      "Teflon/PTFE toxicosis",
+      "Psittacosis (parrot fever)",
+    ],
+    correct: "Aspergillosis (fungal respiratory infection)",
+    explanation: "Captain has aspergillosis — a fungal infection of the respiratory system caused by Aspergillus mold. This is one of the most common diseases in pet parrots! Two factors made Captain vulnerable: his seed-only diet caused vitamin A deficiency (vitamin A protects the respiratory lining), and the weakened immune system let the fungal spores take hold. The non-stick pan fumes are also harmful to birds (PTFE toxicity is real!) but aspergillosis better explains the chronic symptoms. Treatment involves antifungal medications and a major diet upgrade to include vegetables and pellets. Fun fact: birds have a super efficient respiratory system with air sacs — which is amazing for flying, but means respiratory infections can spread very quickly through their whole body!",
+    hint: "Look at the blood test results carefully — what deficiency was found? And think about what that deficiency does to the body's defenses...",
+    vitals: "Weight: 380g (should be ~420g) • Breathing: labored with tail bobbing • Feather condition: poor",
+  },
+
+  // ---- CASE 5: Medium ----
+  {
+    animal: { name: "Ziggy", emoji: "🐕", species: "Beagle, 8 years old" },
+    owner: { name: "Priya S.", complaint: "Ziggy has been drinking WAY more water than usual and peeing constantly. He's also lost weight even though he's eating more than ever." },
+    difficulty: 2,
+    investigations: {
+      "talk-owner":    { clue: "Priya says the increased drinking started about 3 weeks ago and has gotten worse. Ziggy used to drink one bowl a day, now he goes through three or four. He's lost about 2 kg in the past month despite eating enthusiastically.", icon: "💬" },
+      "physical-exam": { clue: "Ziggy is alert and seems happy, but he's noticeably thinner than his records show. His coat is a bit dull. His eyes have a very slight cloudy appearance. Gums are pink and healthy.", icon: "🩺" },
+      "temperature":   { clue: "Temperature: 38.5°C — perfectly normal for a dog.", icon: "🌡️" },
+      "blood-test":    { clue: "Blood glucose level: 18.2 mmol/L — this is very high! Normal range for dogs is 3.3-6.1 mmol/L. Fructosamine (long-term sugar level) is also elevated. Liver and kidney values are normal.", icon: "🔬" },
+      "xray":          { clue: "Chest and abdominal X-rays look normal. No masses, no enlarged organs. Heart size is normal.", icon: "☢️" },
+      "urine-test":    { clue: "Urine is very dilute (the kidneys are working overtime). Glucose detected in urine — the kidneys are spilling sugar because there's too much in the blood. No bacteria.", icon: "🧪" },
+      "skin-scrape":   { clue: "Skin is slightly dry but no parasites or infections. Coat quality is below average.", icon: "🔎" },
+      "ultrasound":    { clue: "Pancreas appears slightly smaller than normal. Liver and kidneys look healthy. No tumors or masses anywhere.", icon: "📡" },
+    },
+    diagnoses: [
+      "Diabetes mellitus",
+      "Cushing's disease",
+      "Kidney failure",
+      "Hyperthyroidism",
+    ],
+    correct: "Diabetes mellitus",
+    explanation: "Ziggy has diabetes mellitus — the same disease humans can get! His pancreas isn't producing enough insulin, which is the hormone that tells cells to absorb sugar from the blood. Without insulin, sugar builds up in the blood (which is why his blood glucose was so high) and spills into the urine. His body can't use the sugar for energy, so it breaks down fat and muscle instead — that's why he's losing weight despite eating more. The excessive thirst and peeing happen because the kidneys try to flush out the extra sugar. Treatment involves daily insulin injections, a special diet, and regular monitoring. Fun fact: dogs almost always get Type 1 diabetes (like some humans), while cats more commonly get Type 2!",
+    hint: "The classic trio of symptoms: drinking more, peeing more, losing weight despite eating more. What human disease has these exact same symptoms?",
+    vitals: "Heart Rate: 100 bpm (normal) • Breathing: normal • Weight: 11 kg (was 13 kg last visit) • Hydration: mildly dehydrated",
+  },
+
+  // ---- CASE 6: Hard ----
+  {
+    animal: { name: "Mochi", emoji: "🐹", species: "Syrian Hamster, 1.5 years old" },
+    owner: { name: "Emma W.", complaint: "Mochi has a big lump on her side that appeared in the last two weeks. She's still eating okay but seems slower." },
+    difficulty: 3,
+    investigations: {
+      "talk-owner":    { clue: "Emma says the lump started small, like a pea, and grew quickly over about two weeks. Mochi is still eating and drinking but sleeps more than usual. She's an only hamster with a clean cage.", icon: "💬" },
+      "physical-exam": { clue: "There's a firm, round mass about 2 cm in diameter on Mochi's left flank. It's attached to the tissue underneath (not freely movable). Mochi doesn't seem to be in pain when you touch it. The rest of her exam is normal for her age.", icon: "🩺" },
+      "temperature":   { clue: "Difficult to measure precisely in hamsters, but she feels warm and normal.", icon: "🌡️" },
+      "blood-test":    { clue: "Very small blood sample possible in hamsters. Results show mild anemia (slightly low red blood cells). White blood cells are in the normal range.", icon: "🔬" },
+      "xray":          { clue: "X-ray shows a soft tissue mass on the left side. It doesn't appear to involve the bone. Internal organs look normal — no obvious spread to the lungs or abdomen.", icon: "☢️" },
+      "urine-test":    { clue: "No significant findings. Hamster urine is normally quite concentrated.", icon: "🧪" },
+      "skin-scrape":   { clue: "Cells from a fine needle aspirate of the lump show clusters of abnormal cells that look different from normal tissue. They vary in size and shape — this is suspicious for a tumor.", icon: "🔎" },
+      "ultrasound":    { clue: "Ultrasound of the mass shows it has its own blood supply and is solid (not fluid-filled like an abscess would be). Internal organs appear clear.", icon: "📡" },
+    },
+    diagnoses: [
+      "Tumor (neoplasia)",
+      "Abscess from a bite wound",
+      "Fatty lipoma (benign lump)",
+      "Enlarged lymph node from infection",
+    ],
+    correct: "Tumor (neoplasia)",
+    explanation: "Mochi has a tumor — an abnormal growth of cells. Tumors are unfortunately very common in hamsters, especially as they get older (hamsters typically live 2-3 years). The key clues were: rapid growth over two weeks, the mass being fixed to underlying tissue (not freely movable), and the fine needle aspirate showing abnormal cells. An abscess would typically be warm, painful, and fluid-filled. A lipoma would be soft and moveable. Treatment options for hamsters include surgical removal if the tumor is accessible, but the vet has to consider whether a tiny hamster can safely undergo anesthesia. Fun fact: Syrian hamsters are actually used in medical research specifically because of how commonly they develop tumors — studying them helps scientists understand cancer in all animals, including humans!",
+    hint: "Think about how fast the lump grew and what the cell sample showed. What kind of growth produces abnormal cells that look different from each other?",
+    vitals: "Weight: 135g (normal range) • Activity: reduced • Appetite: maintained",
+  },
+
+  // ---- CASE 7: Hard ----
+  {
+    animal: { name: "Storm", emoji: "🐴", species: "Thoroughbred Horse, 9 years old" },
+    owner: { name: "Jake R.", complaint: "Storm is sweating, rolling on the ground, and keeps looking at his belly. He won't eat and seems really uncomfortable." },
+    difficulty: 3,
+    investigations: {
+      "talk-owner":    { clue: "Jake says Storm was fine this morning but started acting restless about 3 hours ago. He's been pawing at the ground and lying down then getting up repeatedly. His feed hasn't changed recently, but Jake noticed Storm didn't pass any manure today.", icon: "💬" },
+      "physical-exam": { clue: "Storm is visibly distressed — sweating, pawing, and trying to roll. His heart rate is elevated. Gut sounds are almost completely absent on the right side and reduced on the left (normally you should hear lots of gurgling). His gums are slightly dark pink with a delayed capillary refill time of 3 seconds.", icon: "🩺" },
+      "temperature":   { clue: "Temperature: 38.9°C (normal for horses: 37.5-38.5°C). Mildly elevated, likely from pain and stress.", icon: "🌡️" },
+      "blood-test":    { clue: "Packed cell volume (PCV) is elevated at 48% — this means Storm is dehydrated (normal: 32-42%). Lactate levels are mildly elevated, which indicates tissue is not getting enough blood flow. White blood cells are normal.", icon: "🔬" },
+      "xray":          { clue: "Abdominal X-rays are difficult in horses due to size, but images show distended loops of intestine with gas. No obvious displacement visible in the images captured.", icon: "☢️" },
+      "urine-test":    { clue: "No urine sample obtainable — Storm is too distressed to urinate.", icon: "🧪" },
+      "skin-scrape":   { clue: "Not relevant to the current emergency. Skin and coat appear normal.", icon: "🔎" },
+      "ultrasound":    { clue: "Abdominal ultrasound shows distended, non-moving loops of small intestine. Fluid is visible between intestinal loops. The large colon appears gas-filled and may be displaced from its normal position.", icon: "📡" },
+    },
+    diagnoses: [
+      "Colic (intestinal crisis)",
+      "Muscle cramps from exercise",
+      "Gastric ulcer rupture",
+      "Tetanus",
+    ],
+    correct: "Colic (intestinal crisis)",
+    explanation: "Storm has colic — the #1 emergency in horses and the leading cause of death in domestic horses. 'Colic' is actually a general term meaning abdominal pain, but in horses it usually means something has gone wrong with the intestines. Storm's case shows signs of a possible intestinal displacement — part of the large colon may have shifted out of position, trapping gas and blocking the flow of digesta. The absent gut sounds, dehydration, elevated lactate, and visible distress all point to a serious colic episode. Treatment depends on severity: mild colic can be managed with pain medication, fluids, and walking the horse. Severe cases like Storm's may need emergency surgery. Time is critical — the longer the intestine is compromised, the higher the risk of tissue death. Fun fact: horses can't vomit (their digestive system only goes one way), which is partly why intestinal problems are so dangerous for them!",
+    hint: "Look at Storm's behavior — rolling, pawing, looking at belly, no manure. What is the most common equine emergency that causes severe abdominal pain?",
+    vitals: "Heart Rate: 56 bpm (normal: 28-40) • Breathing: 24/min (elevated) • Gut sounds: absent right, reduced left • CRT: 3 seconds (delayed)",
+  },
+
+  // ---- CASE 8: Hard ----
+  {
+    animal: { name: "Noodle", emoji: "🐍", species: "Ball Python, 4 years old" },
+    owner: { name: "Tyler B.", complaint: "Noodle hasn't eaten in 6 weeks and I noticed her mouth looks weird — there's some cheesy-looking stuff in there." },
+    difficulty: 3,
+    investigations: {
+      "talk-owner":    { clue: "Tyler keeps Noodle in a glass tank. The temperature on the warm side is about 26°C (should be 30-32°C) and humidity is around 30% (should be 50-60%). The substrate is wood shavings. Noodle last shed about 2 months ago and it came off in pieces.", icon: "💬" },
+      "physical-exam": { clue: "Opening Noodle's mouth reveals yellow-white, cheesy plaques on the gums and roof of the mouth. The tissue around the plaques is red and swollen. There's excess mucus. Noodle's body condition is thin and she has some retained shed skin around her head.", icon: "🩺" },
+      "temperature":   { clue: "Reptiles are cold-blooded — their body temperature matches their environment. Noodle feels cool, consistent with an enclosure that's too cold.", icon: "🌡️" },
+      "blood-test":    { clue: "White blood cells are very elevated — the immune system is fighting hard. Heterophils (reptile version of neutrophils) are especially high, indicating a bacterial infection. Protein levels are low from not eating.", icon: "🔬" },
+      "xray":          { clue: "X-ray shows no pneumonia in the lungs. No other structural abnormalities. Skeleton looks normal.", icon: "☢️" },
+      "urine-test":    { clue: "Urate sample (reptile version of urine) is normal colored. Kidney function appears adequate.", icon: "🧪" },
+      "skin-scrape":   { clue: "Examining the mouth plaques under microscope shows massive amounts of bacteria and inflammatory cells. The bacteria are rod-shaped (gram-negative). Some fungal elements may also be present.", icon: "🔎" },
+      "ultrasound":    { clue: "No abdominal abnormalities. No egg retention. Internal organs look appropriate.", icon: "📡" },
+    },
+    diagnoses: [
+      "Infectious stomatitis (mouth rot)",
+      "Vitamin C deficiency",
+      "Normal brumation (winter fasting)",
+      "Respiratory infection",
+    ],
+    correct: "Infectious stomatitis (mouth rot)",
+    explanation: "Noodle has infectious stomatitis, commonly known as 'mouth rot' — one of the most common diseases in captive snakes. It's a bacterial (and sometimes fungal) infection of the mouth tissue. The root cause here is husbandry problems: the enclosure is too cold and too dry. Reptiles rely on environmental heat to power their immune system — when temperatures are too low, their immune system basically goes to sleep, allowing bacteria to take over. The low humidity also caused bad sheds (retained skin), which can create entry points for infection. Treatment involves antibiotics, daily mouth cleaning with antiseptic, and — most importantly — fixing the enclosure to proper temperatures and humidity. Fun fact: this case teaches a critical lesson in reptile medicine — most reptile diseases are caused by incorrect husbandry (housing conditions), not by germs alone. Fix the environment, and you fix most of the problems!",
+    hint: "Focus on the housing conditions Tyler described. What happens to a cold-blooded animal's immune system when their environment is too cold?",
+    vitals: "Body condition: thin • Last shed: incomplete (dysecdysis) • Enclosure temp: too low • Humidity: too low",
+  },
+];
+
+// ============================================
+// SECTION 2: GAME STATE
+// ============================================
+
+const gameState = {
+  currentCaseIndex: 0,
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  casesCompleted: [],    // { caseIndex, correct, stars, testsUsed }
+  usedTools: [],         // tool IDs used in current case
+  evidenceFound: [],     // clue strings for current case
+  hintsUsed: 0,
+  diagnosed: false,
+};
+
+// ============================================
+// SECTION 3: SOUND EFFECTS (Web Audio API)
+// ============================================
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+  const now = audioCtx.currentTime;
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  gainNode.gain.setValueAtTime(0.15, now);
+
+  if (type === "clue") {
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(600, now);
+    oscillator.frequency.exponentialRampToValueAtTime(900, now + 0.15);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+    oscillator.start(now);
+    oscillator.stop(now + 0.3);
+  } else if (type === "correct") {
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(523, now);
+    oscillator.frequency.setValueAtTime(659, now + 0.15);
+    oscillator.frequency.setValueAtTime(784, now + 0.3);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+    oscillator.start(now);
+    oscillator.stop(now + 0.6);
+  } else if (type === "wrong") {
+    oscillator.type = "sawtooth";
+    oscillator.frequency.setValueAtTime(200, now);
+    oscillator.frequency.exponentialRampToValueAtTime(100, now + 0.4);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+    oscillator.start(now);
+    oscillator.stop(now + 0.4);
+  } else if (type === "click") {
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(800, now);
+    gainNode.gain.setValueAtTime(0.08, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+    oscillator.start(now);
+    oscillator.stop(now + 0.08);
+  } else if (type === "levelup") {
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(440, now);
+    oscillator.frequency.setValueAtTime(554, now + 0.12);
+    oscillator.frequency.setValueAtTime(659, now + 0.24);
+    oscillator.frequency.setValueAtTime(880, now + 0.36);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+    oscillator.start(now);
+    oscillator.stop(now + 0.7);
+  }
+}
+
+// ============================================
+// SECTION 4: GAME LOGIC
+// ============================================
+
+function getCurrentCase() {
+  return cases[gameState.currentCaseIndex];
+}
+
+function calculateStars(testsUsed, correct, hintUsed) {
+  if (!correct) return 0;
+  let stars = 3;
+  if (testsUsed > 4) stars = 2;
+  if (testsUsed > 6) stars = 1;
+  if (hintUsed) stars = Math.max(1, stars - 1);
+  return stars;
+}
+
+function calculatePoints(stars, difficulty) {
+  const base = difficulty * 30;
+  const starBonus = stars * 15;
+  const streakBonus = gameState.streak * 5;
+  return base + starBonus + streakBonus;
+}
+
+function getRank(score) {
+  let rank = ranks[0];
+  for (const r of ranks) {
+    if (score >= r.minScore) rank = r;
+  }
+  return rank;
+}
+
+function updateRankDisplay() {
+  const rank = getRank(gameState.score);
+  document.getElementById("rank-display").textContent = rank.title;
+}
+
+// ============================================
+// SECTION 5: UI / DISPLAY
+// ============================================
+
+function loadCase() {
+  const c = getCurrentCase();
+  gameState.usedTools = [];
+  gameState.evidenceFound = [];
+  gameState.hintsUsed = 0;
+  gameState.diagnosed = false;
+
+  // Patient info
+  document.getElementById("patient-emoji").textContent = c.animal.emoji;
+  document.getElementById("patient-name").textContent = c.animal.name;
+  document.getElementById("patient-species").textContent = c.animal.species;
+  document.getElementById("owner-name").textContent = c.owner.name;
+  document.getElementById("chief-complaint").textContent = `"${c.owner.complaint}"`;
+
+  // Difficulty stars
+  const diffEl = document.getElementById("case-difficulty");
+  let starsHtml = '<span style="font-size: 0.85rem; margin-right: 0.3rem;">Difficulty:</span>';
+  for (let i = 1; i <= 3; i++) {
+    starsHtml += `<span class="difficulty-star ${i <= c.difficulty ? '' : 'empty'}">★</span>`;
+  }
+  diffEl.innerHTML = starsHtml;
+
+  // Vitals
+  if (c.vitals) {
+    document.getElementById("vital-signs").style.display = "block";
+    document.getElementById("vitals-content").textContent = c.vitals;
+  } else {
+    document.getElementById("vital-signs").style.display = "none";
+  }
+
+  // Header stats
+  document.getElementById("case-num").textContent = gameState.currentCaseIndex + 1;
+  document.getElementById("total-cases").textContent = cases.length;
+  document.getElementById("score-display").textContent = gameState.score;
+  document.getElementById("streak-display").textContent = gameState.streak;
+  updateRankDisplay();
+
+  // Timer bar reset
+  document.getElementById("timer-bar").style.width = "100%";
+
+  // Investigation tools
+  renderTools();
+
+  // Clear clue area
+  document.getElementById("clue-content").className = "clue-content empty";
+  document.getElementById("clue-content").textContent = "Select an investigation tool to begin gathering clues...";
+
+  // Clear evidence board
+  document.getElementById("evidence-list").innerHTML =
+    '<div style="color: #666; font-style: italic; font-size: 0.85rem; text-align: center; padding: 1rem;">Clues you discover will appear here</div>';
+
+  // Render diagnosis options
+  renderDiagnoses();
+
+  // Reset hint
+  document.getElementById("hint-btn").disabled = false;
+  document.getElementById("hint-btn").textContent = "💡 Need a hint?";
+  document.getElementById("hint-area").innerHTML = "";
+}
+
+function renderTools() {
+  const grid = document.getElementById("tools-grid");
+  grid.innerHTML = "";
+  for (const tool of investigationTools) {
+    const btn = document.createElement("button");
+    btn.className = "tool-btn";
+    btn.id = `tool-${tool.id}`;
+    btn.innerHTML = `
+      <span class="tool-icon">${tool.icon}</span>
+      <span>${tool.name}</span>
+      <span class="tool-cost">${tool.cost === 1 ? "⚡" : "⚡⚡"}</span>
+    `;
+    btn.onclick = () => useTool(tool.id);
+    grid.appendChild(btn);
+  }
+}
+
+function renderDiagnoses() {
+  const c = getCurrentCase();
+  const container = document.getElementById("diagnosis-options");
+  container.innerHTML = "";
+
+  // Shuffle diagnoses
+  const shuffled = [...c.diagnoses].sort(() => Math.random() - 0.5);
+
+  for (const diag of shuffled) {
+    const btn = document.createElement("button");
+    btn.className = "diagnosis-btn";
+    btn.textContent = diag;
+    btn.onclick = () => submitDiagnosis(diag, btn);
+    container.appendChild(btn);
+  }
+}
+
+function addEvidence(icon, text) {
+  const list = document.getElementById("evidence-list");
+  // Remove placeholder text if present
+  if (gameState.evidenceFound.length === 0) {
+    list.innerHTML = "";
+  }
+  const item = document.createElement("div");
+  item.className = "evidence-item";
+  item.innerHTML = `<span class="evidence-icon">${icon}</span><span>${text}</span>`;
+  list.appendChild(item);
+  list.scrollTop = list.scrollHeight;
+  gameState.evidenceFound.push(text);
+}
+
+// ============================================
+// SECTION 6: PLAYER ACTIONS
+// ============================================
+
+function useTool(toolId) {
+  if (gameState.diagnosed) return;
+  if (gameState.usedTools.includes(toolId)) return;
+
+  const c = getCurrentCase();
+  const investigation = c.investigations[toolId];
+  if (!investigation) return;
+
+  // Resume audio context if suspended
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  playSound("clue");
+  gameState.usedTools.push(toolId);
+
+  // Mark tool as used
+  const toolBtn = document.getElementById(`tool-${toolId}`);
+  toolBtn.classList.add("used");
+  toolBtn.disabled = true;
+
+  // Show clue in center area
+  const clueEl = document.getElementById("clue-content");
+  clueEl.className = "clue-content";
+  clueEl.innerHTML = `<strong>${investigation.icon} ${investigationTools.find(t => t.id === toolId).name}:</strong><br><br>${investigation.clue}`;
+
+  // Add to evidence board (shortened version)
+  const shortClue = investigation.clue.length > 100
+    ? investigation.clue.substring(0, 100) + "..."
+    : investigation.clue;
+  addEvidence(investigation.icon, shortClue);
+
+  // Animate timer bar (visual feedback of resources used)
+  const used = gameState.usedTools.length;
+  const total = investigationTools.length;
+  const pct = Math.max(0, 100 - (used / total) * 100);
+  document.getElementById("timer-bar").style.width = pct + "%";
+}
+
+function submitDiagnosis(diagnosis, btnEl) {
+  if (gameState.diagnosed) return;
+
+  // Resume audio context if suspended
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  const c = getCurrentCase();
+  const correct = diagnosis === c.correct;
+  gameState.diagnosed = true;
+
+  if (correct) {
+    playSound("correct");
+    btnEl.classList.add("correct");
+
+    gameState.streak += 1;
+    if (gameState.streak > gameState.bestStreak) gameState.bestStreak = gameState.streak;
+
+    const stars = calculateStars(gameState.usedTools.length, true, gameState.hintsUsed > 0);
+    const points = calculatePoints(stars, c.difficulty);
+    gameState.score += points;
+
+    gameState.casesCompleted.push({
+      caseIndex: gameState.currentCaseIndex,
+      correct: true,
+      stars: stars,
+      testsUsed: gameState.usedTools.length,
+    });
+
+    // Show result after a beat
+    setTimeout(() => showResult(true, stars, points), 600);
+  } else {
+    playSound("wrong");
+    btnEl.classList.add("wrong");
+    gameState.streak = 0;
+
+    gameState.casesCompleted.push({
+      caseIndex: gameState.currentCaseIndex,
+      correct: false,
+      stars: 0,
+      testsUsed: gameState.usedTools.length,
+    });
+
+    setTimeout(() => showResult(false, 0, 0), 600);
+  }
+
+  // Disable all diagnosis buttons
+  document.querySelectorAll(".diagnosis-btn").forEach(b => b.disabled = true);
+
+  // Update displays
+  document.getElementById("score-display").textContent = gameState.score;
+  document.getElementById("streak-display").textContent = gameState.streak;
+  updateRankDisplay();
+}
+
+function showHint() {
+  const c = getCurrentCase();
+  if (!c.hint) return;
+
+  playSound("click");
+  gameState.hintsUsed += 1;
+
+  document.getElementById("hint-btn").disabled = true;
+  document.getElementById("hint-btn").textContent = "💡 Hint used";
+  document.getElementById("hint-area").innerHTML = `<div class="hint-text">${c.hint}</div>`;
+}
+
+// ============================================
+// SECTION 7: RESULTS & PROGRESSION
+// ============================================
+
+function showResult(correct, stars, points) {
+  const c = getCurrentCase();
+  const overlay = document.getElementById("result-overlay");
+  overlay.classList.add("show");
+
+  document.getElementById("result-emoji").textContent = correct ? "🎉" : "😓";
+  document.getElementById("result-title").textContent = correct ? "Case Solved!" : "Not Quite...";
+
+  document.getElementById("diagnosis-reveal").innerHTML =
+    `<strong>Correct Diagnosis:</strong><br>${c.correct}`;
+
+  document.getElementById("result-explanation").textContent = c.explanation;
+
+  const starsHtml = correct
+    ? "⭐".repeat(stars) + "☆".repeat(3 - stars)
+    : "☆☆☆";
+  document.getElementById("result-stars").textContent = starsHtml;
+
+  document.getElementById("result-tests-used").textContent = gameState.usedTools.length;
+  document.getElementById("result-points").textContent = correct ? `+${points}` : "+0";
+
+  // Check if this is the last case
+  const isLast = gameState.currentCaseIndex >= cases.length - 1;
+  const nextBtn = document.getElementById("next-btn");
+  nextBtn.textContent = isLast ? "See Final Results 🏆" : "Next Case →";
+  nextBtn.onclick = isLast ? showSummary : nextCase;
+
+  if (correct && stars === 3) {
+    setTimeout(() => playSound("levelup"), 300);
+  }
+}
+
+function nextCase() {
+  document.getElementById("result-overlay").classList.remove("show");
+  gameState.currentCaseIndex += 1;
+
+  if (gameState.currentCaseIndex >= cases.length) {
+    showSummary();
+    return;
+  }
+  loadCase();
+}
+
+function showSummary() {
+  document.getElementById("result-overlay").classList.remove("show");
+  const overlay = document.getElementById("summary-overlay");
+  overlay.classList.add("show");
+
+  playSound("levelup");
+
+  const totalStars = gameState.casesCompleted.reduce((sum, c) => sum + c.stars, 0);
+  const totalSolved = gameState.casesCompleted.filter(c => c.correct).length;
+  const rank = getRank(gameState.score);
+
+  document.getElementById("final-score").textContent = gameState.score;
+  document.getElementById("final-solved").textContent = `${totalSolved}/${cases.length}`;
+  document.getElementById("final-stars").textContent = `${totalStars}/${cases.length * 3}`;
+  document.getElementById("final-rank").textContent = `Final Rank: ${rank.title}`;
+
+  // Case recap
+  const recapEl = document.getElementById("case-recap");
+  recapEl.innerHTML = "";
+  for (const completed of gameState.casesCompleted) {
+    const c = cases[completed.caseIndex];
+    const item = document.createElement("div");
+    item.className = "case-recap-item";
+    item.innerHTML = `
+      <span>${c.animal.emoji} ${c.animal.name}</span>
+      <span class="recap-stars">${completed.correct ? "⭐".repeat(completed.stars) + "☆".repeat(3 - completed.stars) : "❌"}</span>
+    `;
+    recapEl.appendChild(item);
+  }
+
+  // Save high score
+  saveHighScore();
+}
+
+function showNotebook() {
+  if (gameState.casesCompleted.length === 0) {
+    alert("📓 Your casebook is empty! Solve some cases first.");
+    return;
+  }
+
+  let text = "📓 VET DETECTIVE CASEBOOK\n";
+  text += "═══════════════════════\n\n";
+  for (const completed of gameState.casesCompleted) {
+    const c = cases[completed.caseIndex];
+    const stars = completed.correct ? "⭐".repeat(completed.stars) : "❌";
+    text += `${c.animal.emoji} ${c.animal.name} (${c.animal.species})\n`;
+    text += `   Diagnosis: ${c.correct}\n`;
+    text += `   Result: ${stars} | Tests: ${completed.testsUsed}\n\n`;
+  }
+  text += `Total Score: ${gameState.score} | Rank: ${getRank(gameState.score).title}`;
+  alert(text);
+}
+
+// ============================================
+// SECTION 8: SAVE / LOAD (localStorage)
+// ============================================
+
+function saveHighScore() {
+  try {
+    const existing = JSON.parse(localStorage.getItem("vet-detective-scores") || "[]");
+    existing.push({
+      score: gameState.score,
+      rank: getRank(gameState.score).title,
+      date: new Date().toLocaleDateString(),
+      solved: gameState.casesCompleted.filter(c => c.correct).length,
+      total: cases.length,
+    });
+    existing.sort((a, b) => b.score - a.score);
+    localStorage.setItem("vet-detective-scores", JSON.stringify(existing.slice(0, 10)));
+  } catch (e) {
+    // localStorage not available — no problem
+  }
+}
+
+// ============================================
+// SECTION 9: START / RESTART
+// ============================================
+
+function startGame() {
+  document.getElementById("title-screen").style.display = "none";
+  document.getElementById("game-screen").style.display = "block";
+  loadCase();
+}
+
+function restartGame() {
+  document.getElementById("summary-overlay").classList.remove("show");
+  gameState.currentCaseIndex = 0;
+  gameState.score = 0;
+  gameState.streak = 0;
+  gameState.bestStreak = 0;
+  gameState.casesCompleted = [];
+  loadCase();
+}
+</script>
+</body>
+</html>
