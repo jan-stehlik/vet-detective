@@ -1,0 +1,80 @@
+.container {
+  animation: fadeIn 0.5s ease;
+}
+
+.timerBarContainer {
+  height: 4px;
+  background: var(--bg-secondary);
+  width: 100%;
+}
+
+.timerBar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--gold), var(--accent));
+  transition: width 1s linear;
+}
+
+.header {
+  background: var(--bg-secondary);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--accent);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rank {
+  font-size: 1.1rem;
+  color: var(--gold);
+}
+
+.stats {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+  align-items: center;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.statIcon { font-size: 1.2rem; }
+.statValue { color: var(--gold); font-weight: bold; }
+
+.notebookBtn {
+  background: transparent;
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+}
+
+.notebookBtn:hover {
+  background: rgba(245, 200, 66, 0.1);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr 300px;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 60px);
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+    max-width: 700px;
+  }
+}

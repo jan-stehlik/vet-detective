@@ -2,9 +2,16 @@
 
 A browser-based detective game where you investigate mysterious animal illnesses, gather clues, and diagnose patients — just like a real veterinarian!
 
+## How to run
+
+```bash
+npm install
+npm run dev
+```
+
 ## How to play
 
-1. Open `index.html` in any web browser (double-click the file)
+1. Open the URL shown in your terminal (usually http://localhost:5173)
 2. Click **"Begin Investigation"** to start your first case
 3. Use investigation tools (talk to owner, physical exam, blood test, X-ray, etc.) to gather clues
 4. Review the evidence board and submit your diagnosis
@@ -32,7 +39,14 @@ This game is designed to be extended using [Claude Code](https://claude.ai). Ope
 
 No coding experience needed — just describe what you want!
 
+## Tech stack
+
+- React + TypeScript + Vite
+- CSS Modules for styling
+- Web Audio API for sound effects
+- No external UI libraries
+
 ## Requirements
 
+- Node.js 18+
 - Any modern web browser (Chrome, Safari, Firefox, Edge)
-- No install, no build step, no dependencies

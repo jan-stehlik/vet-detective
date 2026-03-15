@@ -1,0 +1,123 @@
+.board {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.board h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.evidenceList {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 300px;
+}
+
+.placeholder {
+  color: #666;
+  font-style: italic;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.evidenceItem {
+  background: var(--bg-clue);
+  color: var(--text-dark);
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  animation: slideIn 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.evidenceIcon { font-size: 1.1rem; flex-shrink: 0; }
+
+.diagnosisSection { margin-top: auto; }
+
+.diagnosisSection h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+  color: var(--accent);
+}
+
+.diagnosisBtn {
+  display: block;
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 2px solid #334;
+  color: var(--text-light);
+  padding: 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s;
+  text-align: left;
+}
+
+.diagnosisBtn:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: #1a2a4e;
+}
+
+.diagnosisBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.correct {
+  border-color: var(--green) !important;
+  background: rgba(46, 204, 113, 0.2) !important;
+  animation: correctPulse 0.5s ease;
+}
+
+.wrong {
+  border-color: var(--accent) !important;
+  background: rgba(233, 69, 96, 0.2) !important;
+  animation: shake 0.5s ease;
+}
+
+.hintBtn {
+  background: transparent;
+  border: 1px dashed #666;
+  color: #888;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  transition: all 0.3s;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.hintBtn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+.hintBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.hintText {
+  background: rgba(245, 200, 66, 0.1);
+  border: 1px solid rgba(245, 200, 66, 0.3);
+  color: var(--gold);
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  animation: revealClue 0.3s ease;
+  font-style: italic;
+}

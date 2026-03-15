@@ -1,0 +1,82 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 150;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.card {
+  background: var(--manila);
+  color: var(--text-dark);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  animation: popIn 0.3s ease;
+  position: relative;
+}
+
+.card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+.empty {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+}
+
+.caseEntry {
+  background: white;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--manila-dark);
+}
+
+.caseHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+.caseStars { color: var(--gold); }
+
+.caseDiagnosis {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.caseTests {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 0.2rem;
+}
+
+.closeBtn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.6rem 2rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border-radius: 50px;
+  cursor: pointer;
+  display: block;
+  margin: 1rem auto 0;
+  transition: all 0.3s;
+}
+
+.closeBtn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
